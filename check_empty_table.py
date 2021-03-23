@@ -8,10 +8,37 @@
 # Import the BigQuery client library
 from google.cloud import bigquery
 import datetime
+import json
 
-# Construct a BigQuery client object.
-client = bigquery.Client()
 
+# Helper function for pulling message from Pub/Sub
+def receive_messages(project_id, subscription_id, timeout=None):
+    """Receives messages from a pull subscription."""
+    from concurrent.futures import TimeoutError
+    from google.cloud import pubsub_v1
+
+    subscriber = pubsub_v1.SubscriberClient()
+    # The `subscription_path` method creates a fully qualified identifier
+    # in the form `projects/{project_id}/subscriptions/{subscription_id}`
+    subscription_path = subscriber.subscription_path(project_id, subscription_id)
+
+    def callback(message):
+        print(f"Received {message}.")
+        message.ack()
+
+    streaming_pull_future = subscriber.subscribe(subscription_path, callback=callback)
+    print(f"Listening for messages on {subscription_path}..\n")
+
+    # Wrap subscriber in a 'with' block to automatically call close() when done.
+    with subscriber:
+        try:
+            # When `timeout` is not set, result() will block indefinitely,
+            # unless an exception is encountered first.
+            streaming_pull_future.result(timeout=timeout)
+        except TimeoutError:
+            streaming_pull_future.cancel()
+    # [END pubsub_subscriber_async_pull]
+    # [END pubsub_quickstart_subscriber]
 
 # Helper function for checking if a BQ table has records in it
 def table_has_records(dataset_name, table_name):
@@ -45,11 +72,8 @@ def table_has_records(dataset_name, table_name):
 
     # __TABLES__ metadata table provides a value of "row_count", check to see if value is 0
 
-## STILL WORKING
-def trigger_backfill_job():
-    # Add logic to resolve delayed data use case using backfill
-    pass
 
+# Helper function for scheduling backfill job
 def schedule_backfill(override_values={}):
     """
     Accepts a set of override values as a dictionary. This dictionary should have a 
@@ -58,7 +82,7 @@ def schedule_backfill(override_values={}):
 
     # [START bigquerydatatransfer_schedule_backfill]
     import datetime
-
+    
     from google.cloud import bigquery_datatransfer
 
     transfer_client = bigquery_datatransfer.DataTransferServiceClient()
@@ -105,6 +129,7 @@ def main():
     today = now.strftime('%Y%m%d') # Format as YYYYMMDD, for example: 20210218
     yesterday = now - datetime.timedelta(days=1)
     yesterday = yesterday.strftime('%Y%m%d') # Can use yesterday as partition for testing
+    print(today)
     # TOADD BY CUSTOMER... Adjust parameters ("dataset_id", "partitioned_table_id")
     if table_has_records("bigquery_logs", "cloudaudit_googleapis_com_activity_{}".format(today)) == True:
         print("There are records in the table, we are all good here!")
