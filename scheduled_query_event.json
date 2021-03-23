@@ -1,0 +1,26 @@
+{
+    "dataSourceId": "scheduled_query",
+    "destinationDatasetId": "[DESTINATION_DATASET_ID]",
+    "emailPreferences": {
+      "enableFailureEmail": true
+    },
+    "endTime": "2021-03-08T11:02:30.999154Z",
+    "errorStatus": {
+    
+    },
+    "name": "projects/[PROJECT_NUMBER]/locations/[REGION-CODE]/transferConfigs/[TRANSFER-CONFIG-ID]]/runs/[TRANSFER-RUN-ID]",
+    "notificationPubsubTopic": "projects/[PROJECT_ID]/topics/[PUBSUB_TOPIC_NAME]",
+    "params": {
+      "destination_table_name_template": "[DESTINATION_TABLE_ID]",
+      "partitioning_field": "[PARTITION_FIELD_NAME]",
+      "query": "SELECT foo AS bar FROM project_id.table.dataset",
+      "write_disposition": "WRITE_APPEND"
+    },
+    "runTime": "2021-03-08T11:00:00Z",
+    "schedule": "every day 11:00",
+    "scheduleTime": "2021-03-08T11:00:00Z",
+    "startTime": "2021-03-08T11:00:23.256366Z",
+    "state": "SUCCEEDED",
+    "updateTime": "2021-03-08T11:02:30.999166Z",
+    "userId": "1187586113494778718"
+  }
